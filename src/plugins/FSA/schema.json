@@ -1,0 +1,62 @@
+{
+  "type": "object",
+
+  "required": [
+    "explanation",
+    "automata"
+  ],
+
+  "properties": {
+    "explanation": {
+      "type": "string"
+    },
+
+    "automata": {
+      "type": "object",
+
+      "required": [
+        "type",
+        "states",
+        "alphabet",
+        "start_state",
+        "accept_states",
+        "transitions"
+      ],
+
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+
+        "states": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+
+        "alphabet": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+
+        "start_state": {
+          "type": "string"
+        },
+
+        "accept_states": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+
+        "transitions": {
+          "type": "object"
+        }
+      }
+    }
+  }
+}

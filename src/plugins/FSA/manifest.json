@@ -1,0 +1,10 @@
+{
+  "id": "automata",
+  "name": "Finite State Automata",
+  "version": "0.1.0",
+  "description": "Visualize DFA/NFA automata",
+
+  "prompt": "./prompt.md",
+  "schema": "./schema.json",
+  "renderer": "./renderer.js"
+}

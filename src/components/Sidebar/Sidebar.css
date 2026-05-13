@@ -1,0 +1,239 @@
+.sidebar {
+  width: 260px;
+  min-width: 260px;
+  height: 100%;
+  background: rgba( 17, 17, 17, 0.95);
+  border-right: 1px solid rgba( 63, 63, 70, 0.4);
+  display: flex;
+  flex-direction: column;
+  transition: width 0.25s ease, min-width 0.25s ease;
+  overflow: hidden;
+}
+
+.sidebar--collapsed {
+  width: 56px;
+  min-width: 56px;
+}
+
+/* Top */
+.sidebar__top {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sidebar__toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  color: #a1a1aa;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.15s ease;
+}
+
+.sidebar__toggle:hover {
+  background: rgba( 82, 82, 91, 0.3);
+  color: #e4e4e7;
+}
+
+.sidebar__new-chat {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border: 1px dashed rgba( 161, 161, 170, 0.35);
+  background: rgba( 161, 161, 170, 0.08);
+  color: #a1a1aa;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.sidebar__new-chat:hover {
+  background: rgba( 161, 161, 170, 0.15);
+  border-color: rgba( 161, 161, 170, 0.5);
+  color: #d4d4d8;
+}
+
+.sidebar__icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  color: #a1a1aa;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.15s ease;
+  margin: 0 auto;
+}
+
+.sidebar__icon-btn:hover {
+  background: rgba( 82, 82, 91, 0.3);
+  color: #e4e4e7;
+}
+
+/* Chat List */
+.sidebar__chats {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 8px;
+}
+
+.sidebar__chats::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sidebar__chats::-webkit-scrollbar-thumb {
+  background: rgba( 82, 82, 91, 0.4);
+  border-radius: 2px;
+}
+
+.sidebar__section-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 8px 8px 6px 8px;
+}
+
+.sidebar__chat-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sidebar__empty {
+  color: #475569;
+  font-size: 12px;
+  padding: 8px;
+  margin: 0;
+}
+
+.sidebar__chat-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #a1a1aa;
+  font-size: 13px;
+  transition: all 0.15s ease;
+  position: relative;
+}
+
+.sidebar__chat-item:hover {
+  background: rgba( 82, 82, 91, 0.2);
+  color: #e4e4e7;
+}
+
+.sidebar__chat-item--active {
+  background: rgba( 161, 161, 170, 0.12);
+  color: #d4d4d8;
+}
+
+.sidebar__chat-item--active:hover {
+  background: rgba( 161, 161, 170, 0.18);
+}
+
+.sidebar__chat-icon {
+  flex-shrink: 0;
+  opacity: 0.6;
+}
+
+.sidebar__chat-title {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebar__chat-delete {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: transparent;
+  color: #64748b;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.sidebar__chat-item:hover .sidebar__chat-delete {
+  display: flex;
+}
+
+.sidebar__chat-delete:hover {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+}
+
+/* Bottom */
+.sidebar__bottom {
+  padding: 12px;
+  border-top: 1px solid rgba( 63, 63, 70, 0.3);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sidebar__bottom-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
+  border: none;
+  background: transparent;
+  color: #a1a1aa;
+  cursor: pointer;
+  border-radius: 8px;
+  font-size: 13px;
+  transition: all 0.15s ease;
+  font-family: inherit;
+  width: 100%;
+  text-align: left;
+}
+
+.sidebar__bottom-btn:hover {
+  background: rgba( 82, 82, 91, 0.25);
+  color: #e4e4e7;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    z-index: 100;
+    left: 0;
+    top: 0;
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.4);
+  }
+
+  .sidebar--collapsed {
+    width: 0;
+    min-width: 0;
+    border-right: none;
+    padding: 0;
+  }
+
+  .sidebar--collapsed * {
+    display: none;
+  }
+}

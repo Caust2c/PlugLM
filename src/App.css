@@ -1,0 +1,36 @@
+.app {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  background: #111111;
+}
+
+.app__main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: linear-gradient(180deg, #111111 0%, #1e1e1e 100%);
+  position: relative;
+}
+
+/* Subtle background pattern */
+.app__main::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba( 161, 161, 170, 0.04) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 20%, rgba( 113, 113, 122, 0.03) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.app__main > * {
+  position: relative;
+  z-index: 1;
+}

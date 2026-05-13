@@ -1,0 +1,73 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #111111;
+  color: #e4e4e7;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.5;
+}
+
+#root {
+  height: 100%;
+  width: 100%;
+}
+
+/* Selection */
+::selection {
+  background: rgba( 161, 161, 170, 0.3);
+  color: #f4f4f5;
+}
+
+/* Focus outlines */
+:focus-visible {
+  outline: 2px solid rgba( 161, 161, 170, 0.5);
+  outline-offset: 2px;
+}
+
+/* Scrollbar defaults */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba( 82, 82, 91, 0.4);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba( 82, 82, 91, 0.6);
+}
+
+/* Links */
+a {
+  color: #a1a1aa;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Inputs */
+input, textarea, button {
+  font-family: inherit;
+}
