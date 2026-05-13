@@ -46,3 +46,9 @@ followed by
 Add your custom plugins as a seperate folder with FSA under plugins
 
 Openrouter API Key and Model Requested can be set under settings tab.
+
+FSA Plugin requires Viz-js library
+
+## License
+
+This project is licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
