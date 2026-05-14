@@ -4,13 +4,13 @@
 
 Plugins that use libraries and blend LLM responses with useful visual aids like graphs, machines and labels to help you grasp the dumps of text better.
 
-##### Proof-of-concept stage
+#### Proof-of-concept stage
 
 - Supports openrouter api keys
 - Basic chat functionality
 - Simple Finite State Automata Plugin
 
-##### Working
+#### Working
 
 For now an Finite-State-Automata (FSA) plugin exists
 It can map out FSAs using Viz-js depending on the capability of LLM provided.
@@ -27,13 +27,14 @@ It can map out FSAs using Viz-js depending on the capability of LLM provided.
 - Redesign of UI (AI temp for PoC)
 - Support for API keys from different vendors
 - Token streaming will be added later
-
-##### Plugin format
+- Website Deployment
+  
+#### Plugin format
 
 Refer to FSA folder under plugins for template of how a plugin should look like.
 Ideally, jsons for manifest and schema with a prompt markdown file and a renderer component.
 
-##### Usage Instructions
+#### Usage Instructions
 
 Basic frontend will work out of the box with
 
