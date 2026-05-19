@@ -1,4 +1,5 @@
-import { X, Puzzle, Cpu, Zap } from 'lucide-react';
+import { X, Puzzle, Cpu } from 'lucide-react';
+import RemotePluginLoader from '../../maniload/RemotePluginLoader';
 import './PluginsPanel.css';
 
 const manifestsRaw = import.meta.glob('../../plugins/*/manifest.json', { eager: true });
@@ -7,6 +8,7 @@ const PLUGINS = Object.entries(manifestsRaw).map(([path, module]) => {
   const folder = path.split('/').slice(-2, -1)[0];
   const manifest = module.default || module;
   return {
+    source: 'local',
     folder,
     id: manifest.id || folder,
     name: manifest.name || folder,
@@ -15,8 +17,13 @@ const PLUGINS = Object.entries(manifestsRaw).map(([path, module]) => {
   };
 });
 
-export default function PluginsPanel({ isOpen, onClose, activePluginId, onTogglePlugin }) {
+export default function PluginsPanel({ isOpen, onClose, activePluginId, onTogglePlugin, remotePlugins = [], onAddPlugin }) {
   if (!isOpen) return null;
+
+  const allPlugins = [...PLUGINS, ...remotePlugins].reduce((acc, plugin) => {
+    acc.set(plugin.id, plugin);
+    return acc;
+  }, new Map());
 
   return (
     <div className="plugins-overlay" onClick={onClose}>
@@ -41,7 +48,7 @@ export default function PluginsPanel({ isOpen, onClose, activePluginId, onToggle
         </p>
 
         <div className="plugins-panel__list">
-          {PLUGINS.map((plugin) => {
+          {Array.from(allPlugins.values()).map((plugin) => {
             const isActive = activePluginId === plugin.id;
             return (
               <div key={plugin.id} className={`plugins-panel__item ${isActive ? 'plugins-panel__item--active' : ''}`}>
@@ -51,6 +58,7 @@ export default function PluginsPanel({ isOpen, onClose, activePluginId, onToggle
                 <div className="plugins-panel__item-info">
                   <div className="plugins-panel__item-header">
                     <h3 className="plugins-panel__item-name">{plugin.name}</h3>
+                    {plugin.source === 'remote' && <span className="plugins-panel__badge">Remote</span>}
                     <input 
                       type="checkbox" 
                       checked={isActive} 
@@ -64,6 +72,7 @@ export default function PluginsPanel({ isOpen, onClose, activePluginId, onToggle
             );
           })}
         </div>
+        <RemotePluginLoader onAddPlugin={onAddPlugin} />
         
         <div className="plugins-panel__footer">
           <p>More plugins coming soon. Only one plugin can be active at a time.</p>

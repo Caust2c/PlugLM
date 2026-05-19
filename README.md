@@ -23,12 +23,13 @@ It can map out FSAs using Viz-js depending on the capability of LLM provided.
 - Better chat retention and reference
 - Plugin marketplace
 - Removing need of entering API key everytime
-- Proper way of installing plugins (manifest json and pulling)
 - Redesign of UI (AI temp for PoC)
 - Support for API keys from different vendors
 - Token streaming will be added later
 - Website Deployment
-  
+- Delete plugin
+- test api page
+
 #### Plugin format
 
 Refer to FSA folder under plugins for template of how a plugin should look like.

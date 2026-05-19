@@ -10,6 +10,7 @@ const STORAGE_KEYS = {
   MODEL: 'pluglm_model',
   SIDEBAR_COLLAPSED: 'pluglm_sidebar_collapsed',
   ACTIVE_PLUGIN: 'pluglm_active_plugin',
+  REMOTE_PLUGINS: 'pluglm_remote_plugins',
 };
 
 /**
@@ -71,6 +72,14 @@ export function saveActivePlugin(pluginId) {
   } else {
     localStorage.removeItem(STORAGE_KEYS.ACTIVE_PLUGIN);
   }
+}
+
+export function loadRemotePlugins() {
+  return readJSON(STORAGE_KEYS.REMOTE_PLUGINS, []);
+}
+
+export function saveRemotePlugins(plugins) {
+  writeJSON(STORAGE_KEYS.REMOTE_PLUGINS, plugins);
 }
 
 export function loadApiKey() {

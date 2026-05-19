@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import Sidebar from './components/Sidebar/Sidebar';
 import Chat from './components/Chat/Chat';
 import SettingsModal from './components/SettingsModal/SettingsModal';
@@ -17,24 +17,31 @@ import {
   saveSidebarCollapsed,
   loadActivePlugin,
   saveActivePlugin,
+  loadRemotePlugins,
+  saveRemotePlugins,
 } from './utils/storage';
 import './App.css';
 
 const manifestsRaw = import.meta.glob('./plugins/*/manifest.json', { eager: true });
 const promptsRaw = import.meta.glob('./plugins/*/prompt.md', { query: '?raw', import: 'default', eager: true });
 
-const pluginsConfig = Object.entries(manifestsRaw).reduce((acc, [path, module]) => {
+const builtInPlugins = Object.entries(manifestsRaw).reduce((acc, [path, module]) => {
   const folder = path.split('/').slice(-2, -1)[0];
   const manifest = module.default || module;
   const promptPath = `./plugins/${folder}/prompt.md`;
   
-  acc[manifest.id] = {
+  acc.push({
+    source: 'local',
     folder,
+    id: manifest.id || folder,
+    name: manifest.name || folder,
+    description: manifest.description || '',
+    version: manifest.version || '0.0.0',
     manifest,
     prompt: promptsRaw[promptPath] || ''
-  };
+  });
   return acc;
-}, {});
+}, []);
 
 /**
  * Generate a unique chat ID
@@ -79,6 +86,7 @@ export default function App() {
   const [model, setModel] = useState(() => loadModel() || DEFAULT_MODEL);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => loadSidebarCollapsed());
   const [activePluginId, setActivePluginId] = useState(() => loadActivePlugin());
+  const [remotePlugins, setRemotePlugins] = useState(() => loadRemotePlugins());
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [pluginsOpen, setPluginsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -92,6 +100,17 @@ export default function App() {
   useEffect(() => {
     saveActiveChatId(activeChatId);
   }, [activeChatId]);
+
+  useEffect(() => {
+    saveRemotePlugins(remotePlugins);
+  }, [remotePlugins]);
+
+  const pluginsConfig = useMemo(() => {
+    return [...builtInPlugins, ...remotePlugins].reduce((acc, plugin) => {
+      acc[plugin.id] = plugin;
+      return acc;
+    }, {});
+  }, [remotePlugins]);
 
   // Get active chat
   const activeChat = chats.find((c) => c.id === activeChatId) || chats[0] || null;
@@ -211,6 +230,13 @@ export default function App() {
     saveActivePlugin(pluginId);
   }, []);
 
+  const handleAddRemotePlugin = useCallback((plugin) => {
+    setRemotePlugins((prev) => {
+      const filtered = prev.filter((current) => current.id !== plugin.id);
+      return [...filtered, plugin];
+    });
+  }, []);
+
   // --- Sidebar ---
 
   const handleToggleSidebar = useCallback(() => {
@@ -258,6 +284,8 @@ export default function App() {
         onClose={() => setPluginsOpen(false)}
         activePluginId={activePluginId}
         onTogglePlugin={handleTogglePlugin}
+        remotePlugins={remotePlugins}
+        onAddPlugin={handleAddRemotePlugin}
       />
     </div>
   );
