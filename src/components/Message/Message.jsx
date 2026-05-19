@@ -1,27 +1,36 @@
 import { useState, useRef, useEffect } from 'react';
 import { Copy, Check } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
-import { renderAutomata } from '../../plugins/FSA/renderer';
 import './Message.css';
 
-function extractAutomataExplanation(text) {
-  const explanationMatch = text.match(/\*\*Explanation:\*\*([\s\S]*?)(?:\*\*Formal|States:)/i);
-  if (explanationMatch) {
-    return explanationMatch[1].trim();
+function resolvePluginApi(renderer) {
+  if (!renderer) {
+    return null;
   }
-  // Fallback: get first paragraph before formal spec
-  const paragraphs = text.split('\n\n');
-  if (paragraphs[0] && !paragraphs[0].includes('States:')) {
-    return paragraphs[0];
+
+  if (renderer.plugin && typeof renderer.plugin.render === 'function') {
+    return renderer.plugin;
   }
-  return '';
+
+  if (typeof renderer.render === 'function') {
+    return renderer;
+  }
+
+  if (renderer.default) {
+    return resolvePluginApi(renderer.default);
+  }
+
+  return null;
 }
 
-export default function Message({ message }) {
+export default function Message({ message, activePlugin, pluginsConfig }) {
   const [copied, setCopied] = useState(false);
   const timerRef = useRef(null);
   const containerRef = useRef(null);
   const [parsedData, setParsedData] = useState(null);
+  const messagePlugin = message.pluginId && pluginsConfig ? pluginsConfig[message.pluginId] : null;
+  const runtimePlugin = messagePlugin || activePlugin;
+  const pluginApi = resolvePluginApi(runtimePlugin?.runtime || runtimePlugin?.renderer);
 
   useEffect(() => {
     return () => {
@@ -30,40 +39,34 @@ export default function Message({ message }) {
   }, []);
 
   useEffect(() => {
-    if (message.role === 'assistant') {
+    if (message.role === 'assistant' && pluginApi) {
       try {
         const text = message.content.trim();
-        // Check if it contains automata specification (States:, Alphabet:, etc.)
-        if (text.includes('States:') && text.includes('Transitions:')) {
-          // Extract explanation from the text
-          const explanation = extractAutomataExplanation(text);
-          // This is an automata specification - pass the full text for parsing
-          setParsedData({ type: 'automata_text', content: text, explanation });
-        } else if (text.startsWith('{') && text.endsWith('}')) {
-          // Try to parse as JSON (legacy support)
-          try {
-            const data = JSON.parse(text);
-            if (data.automata && data.explanation) {
-              setParsedData(data);
-            }
-          } catch (e) {
-            // Not valid JSON
-          }
-        }
+        const explanation = typeof pluginApi.extractExplanation === 'function' ? pluginApi.extractExplanation(text) : '';
+        setParsedData({
+          content: text,
+          explanation,
+          renderer: pluginApi.render,
+        });
       } catch (e) {
-        // Not an automata specification
+        setParsedData(null);
       }
+    } else {
+      setParsedData(null);
     }
-  }, [message.content, message.role]);
+  }, [message.content, message.role, pluginApi]);
 
   useEffect(() => {
     if (parsedData && containerRef.current) {
-      if (parsedData.type === 'automata_text') {
-        // Pass the full text for parsing
-        renderAutomata(parsedData.content, containerRef.current);
-      } else {
-        // Legacy JSON format
-        renderAutomata(parsedData, containerRef.current);
+      try {
+        const maybePromise = parsedData.renderer(parsedData.content, containerRef.current);
+        if (maybePromise && typeof maybePromise.then === 'function') {
+          maybePromise.catch((error) => {
+            containerRef.current.innerHTML = `<p style="color: red;">Error rendering plugin: ${error.message}</p>`;
+          });
+        }
+      } catch (error) {
+        containerRef.current.innerHTML = `<p style="color: red;">Error rendering plugin: ${error.message}</p>`;
       }
     }
   }, [parsedData]);

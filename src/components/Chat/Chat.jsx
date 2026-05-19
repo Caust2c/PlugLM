@@ -4,7 +4,7 @@ import InputBar from '../InputBar/InputBar';
 import { Sparkles } from 'lucide-react';
 import './Chat.css';
 
-export default function Chat({ chat, onSend, isLoading, apiKeySet }) {
+export default function Chat({ chat, onSend, isLoading, apiKeySet, activePlugin, pluginsConfig }) {
   const messagesEndRef = useRef(null);
   const messagesContainerRef = useRef(null);
 
@@ -45,7 +45,7 @@ export default function Chat({ chat, onSend, isLoading, apiKeySet }) {
 
         {hasMessages &&
           chat.messages.map((msg, idx) => (
-            <Message key={`${chat.id}-${idx}`} message={msg} />
+            <Message key={`${chat.id}-${idx}`} message={msg} activePlugin={activePlugin} pluginsConfig={pluginsConfig} />
           ))
         }
 

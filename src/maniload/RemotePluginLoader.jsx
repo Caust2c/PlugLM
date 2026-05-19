@@ -63,7 +63,8 @@ async function loadRemotePlugin(manifestUrl) {
     },
     prompt,
     schema,
-    renderer,
+    renderer: rendererUrl,
+    rendererSource: renderer,
   };
 }
 

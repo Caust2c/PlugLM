@@ -116,6 +116,10 @@ function generateDot(automata) {
   return dot;
 }
 
+export function canDetectAutomata(text) {
+  return text.includes('States:') && text.includes('Transitions:');
+}
+
 export async function renderAutomata(data, container) {
   try {
     // If data is a string, parse it as text format
@@ -160,3 +164,10 @@ export async function renderAutomata(data, container) {
     `;
   }
 }
+
+// Standard plugin interface
+export const plugin = {
+  canDetect: canDetectAutomata,
+  extractExplanation,
+  render: renderAutomata
+};

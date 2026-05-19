@@ -24,11 +24,43 @@ import './App.css';
 
 const manifestsRaw = import.meta.glob('./plugins/*/manifest.json', { eager: true });
 const promptsRaw = import.meta.glob('./plugins/*/prompt.md', { query: '?raw', import: 'default', eager: true });
+const renderersRaw = import.meta.glob('./plugins/*/renderer.js', { eager: true });
+
+async function loadRendererModule(plugin) {
+  const renderer = plugin?.renderer;
+  const rendererSource = plugin?.rendererSource || renderer;
+
+  if (!renderer) {
+    return null;
+  }
+
+  if (typeof renderer !== 'string') {
+    return renderer;
+  }
+
+  if (/^(https?:)?\/\//i.test(renderer) || renderer.startsWith('/') || renderer.startsWith('.')) {
+    try {
+      return await import(/* @vite-ignore */ renderer);
+    } catch (error) {
+      console.warn('Direct renderer import failed, falling back to blob import:', error);
+    }
+  }
+
+  const blob = new Blob([rendererSource], { type: 'text/javascript' });
+  const blobUrl = URL.createObjectURL(blob);
+
+  try {
+    return await import(/* @vite-ignore */ blobUrl);
+  } finally {
+    URL.revokeObjectURL(blobUrl);
+  }
+}
 
 const builtInPlugins = Object.entries(manifestsRaw).reduce((acc, [path, module]) => {
   const folder = path.split('/').slice(-2, -1)[0];
   const manifest = module.default || module;
   const promptPath = `./plugins/${folder}/prompt.md`;
+  const rendererPath = `./plugins/${folder}/renderer.js`;
   
   acc.push({
     source: 'local',
@@ -38,7 +70,8 @@ const builtInPlugins = Object.entries(manifestsRaw).reduce((acc, [path, module])
     description: manifest.description || '',
     version: manifest.version || '0.0.0',
     manifest,
-    prompt: promptsRaw[promptPath] || ''
+    prompt: promptsRaw[promptPath] || '',
+    renderer: renderersRaw[rendererPath] || null
   });
   return acc;
 }, []);
@@ -87,6 +120,7 @@ export default function App() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => loadSidebarCollapsed());
   const [activePluginId, setActivePluginId] = useState(() => loadActivePlugin());
   const [remotePlugins, setRemotePlugins] = useState(() => loadRemotePlugins());
+  const [pluginRuntimes, setPluginRuntimes] = useState({});
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [pluginsOpen, setPluginsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -105,12 +139,60 @@ export default function App() {
     saveRemotePlugins(remotePlugins);
   }, [remotePlugins]);
 
+  useEffect(() => {
+    let cancelled = false;
+
+    const hydrateRemotePlugins = async () => {
+      const loadedEntries = await Promise.all(
+        remotePlugins.map(async (plugin) => {
+          if (pluginRuntimes[plugin.id]) {
+            return null;
+          }
+
+          const runtime = await loadRendererModule(plugin);
+          return runtime ? [plugin.id, runtime] : null;
+        })
+      );
+
+      if (cancelled) {
+        return;
+      }
+
+      const nextRuntimes = loadedEntries.reduce((acc, entry) => {
+        if (entry) {
+          const [pluginId, runtime] = entry;
+          acc[pluginId] = runtime;
+        }
+        return acc;
+      }, {});
+
+      if (Object.keys(nextRuntimes).length > 0) {
+        setPluginRuntimes((prev) => ({ ...prev, ...nextRuntimes }));
+      }
+    };
+
+    hydrateRemotePlugins().catch((error) => {
+      console.error('Failed to hydrate remote plugin renderers:', error);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [remotePlugins, pluginRuntimes]);
+
   const pluginsConfig = useMemo(() => {
     return [...builtInPlugins, ...remotePlugins].reduce((acc, plugin) => {
-      acc[plugin.id] = plugin;
+      const runtime = pluginRuntimes[plugin.id] || plugin.renderer || null;
+      acc[plugin.id] = {
+        ...plugin,
+        runtime,
+      };
       return acc;
     }, {});
-  }, [remotePlugins]);
+  }, [remotePlugins, pluginRuntimes]);
+
+  // Get active plugin config
+  const activePlugin = activePluginId && pluginsConfig[activePluginId] ? pluginsConfig[activePluginId] : null;
 
   // Get active chat
   const activeChat = chats.find((c) => c.id === activeChatId) || chats[0] || null;
@@ -183,7 +265,7 @@ export default function App() {
 
         const reply = await sendChatMessage(apiKey, messagesForApi, model);
 
-        const assistantMessage = { role: 'assistant', content: reply };
+        const assistantMessage = { role: 'assistant', content: reply, pluginId: activePluginId || null };
 
         setChats((prev) =>
           prev.map((c) => {
@@ -267,6 +349,8 @@ export default function App() {
           onSend={handleSendMessage}
           isLoading={isLoading}
           apiKeySet={!!apiKey}
+          activePlugin={activePlugin}
+          pluginsConfig={pluginsConfig}
         />
       </main>
 
